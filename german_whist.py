@@ -21,7 +21,7 @@ class Deck:
         random.shuffle(self.cards)
 
     def draw_card(self):
-        return self.cards.pop()
+        return self.cards.pop() # TODO pop breaking code
 
 def deal(deck):
     player1_hand = [deck.draw_card() for _ in range(13)]
@@ -52,22 +52,55 @@ def play_trick(player1_hand, player2_hand, trump, player1_wins):
     """
 
     """
+    # to be able to compare ranks
+    ranking_dict = {"2": 2, "3": 3, "4": 4, "5": 5, "6": 6, 
+                    "7": 7, "8": 8, "9": 9, "10": 10, "J": 11, 
+                    "Q": 12, "K": 13, "A": 14}
     # if player1 won they start
     if player1_wins:
         print("Player 1's turn")
         card1 = choose_card(player1_hand, None)
         print("Player 2's turn")
         card2 = choose_card(player2_hand, card1)
+        # reward schema for player 1 starting
+        if card1.suit == card2.suit:
+            return card1, card2, ranking_dict[card1.rank] >= ranking_dict[card2.rank]
+        elif card1.suit == trump.suit:
+            return card1, card2, True
+        elif card2.suit == trump.suit:
+            return card1, card2, False
+        else:
+            return card1, card2, True
+
     else: # else player two starts
         print("Player 2's turn")
         card2 = choose_card(player2_hand, None)
         print("Player 1's turn")
         card1 = choose_card(player1_hand, card2)
+        # reward schema for player 2 starting
+        if card1.suit == card2.suit:
+            return card1, card2, ranking_dict[card1.rank] <= ranking_dict[card2.rank]
+        elif card1.suit == trump.suit:
+            return card1, card2, True
+        elif card2.suit == trump.suit:
+            return card1, card2, False
+        else:
+            return card1, card2, False
         
-    if card1.suit == card2.suit: # if suits are equal, compare the ranks
-        return card1, card2, card1.rank >= card2.rank
-    else:
-        return card1, card2, card1.suit == trump.suit # else compare suits
+    # if card1.suit == card2.suit: # if suits are equal, compare the ranks
+    #     return card1, card2, card1.rank >= card2.rank
+    # else: # TODO winning system is wrong
+    #     return card1, card2, card1.suit == trump.suit # else compare suits
+    # player 1 started
+    # if card1.suit == card2.suit:
+    #     return card1, card2, card1.rank >= card2.rank
+    # elif card1.suit == trump.suit:
+    #     return card1, card2, True
+    # elif card2.suit == trump.suit:
+    #     return card1, card2, False
+    # else:
+    #     return card1, card2, True
+
 
 def play_first_half(player1_hand, player2_hand, deck):
     trump_card = deck.draw_card()
@@ -89,6 +122,7 @@ def play_first_half(player1_hand, player2_hand, deck):
             player1_hand.append(deck.draw_card()) # player 2 draws the top card
 
         next_card = deck.draw_card() # draw the following card from the deck
+    return player1_wins, trump_card
 
 def play_second_half(player1_hand, player2_hand, trump_card, player1_wins):
     player1_score, player2_score = 0, 0
@@ -109,10 +143,10 @@ def play_second_half(player1_hand, player2_hand, trump_card, player1_wins):
 def main():
     deck = Deck()
     player1_hand, player2_hand = deal(deck)
-    play_first_half(player1_hand, player2_hand, deck)
-    trump_card = deck.draw_card()
-    print(f"\nSecond half. Trump card: {trump_card.suit}")
-    play_second_half(player1_hand, player2_hand, trump_card)
+    player1_wins, trump_card = play_first_half(player1_hand, player2_hand, deck)
+    
+    print(f"\nSecond half. The trump is {trump_card.suit}")
+    play_second_half(player1_hand, player2_hand, trump_card, player1_wins)
 
 if __name__ == "__main__":
     main()
