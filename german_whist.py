@@ -43,7 +43,7 @@ def choose_card(player_hand, other_player_card, player, deck):
     while card not in player_hand:
         # bot that plays randomly
         if ((player == 'player2') & (deck.players == 1)) :
-            card = str(player_hand[random.randint(0,len(player_hand))])
+            card = str(player_hand[random.randint(0,len(player_hand)-1)])
             print(f"player 2 played: {card}")
         else:
             card = input("Choose a card to play: ")
@@ -84,12 +84,12 @@ def play_trick(player1_hand, player2_hand, trump, player1_wins,deck):
 
     else: # else player two starts
         print("Player 2's turn")
-        card2 = choose_card(player2_hand, None, 'player2')
+        card2 = choose_card(player2_hand, None, 'player2',deck)
         print("Player 1's turn")
-        card1 = choose_card(player1_hand, card2, 'player1')
+        card1 = choose_card(player1_hand, card2, 'player1',deck)
         # reward schema for player 2 starting
         if card1.suit == card2.suit:
-            return card1, card2, ranking_dict[card1.rank] <= ranking_dict[card2.rank]
+            return card1, card2, ranking_dict[card1.rank] > ranking_dict[card2.rank]
         elif card1.suit == trump.suit:
             return card1, card2, True
         elif card2.suit == trump.suit:
@@ -121,12 +121,13 @@ def play_first_half(player1_hand, player2_hand, deck):
         next_card = deck.draw_card() # draw the following card from the deck
     return player1_wins, trump_card
 
-def play_second_half(player1_hand, player2_hand, trump_card, player1_wins):
+def play_second_half(player1_hand, player2_hand, trump_card, player1_wins,deck):
     player1_score, player2_score = 0, 0
 
     for _ in range(13):
         print("\nNew trick")
-        card1, card2, player1_wins = play_trick(player1_hand, player2_hand, trump_card, player1_wins)
+        # TODO pass deck to player_trick
+        card1, card2, player1_wins = play_trick(player1_hand, player2_hand, trump_card, player1_wins,deck)
 
         if player1_wins:
             print("Player 1 wins the trick.")
@@ -142,7 +143,7 @@ def main():
     player1_hand, player2_hand = deal(deck)
     player1_wins, trump_card = play_first_half(player1_hand, player2_hand, deck)
     print(f"\nSecond half. The trump is {trump_card.suit}")
-    play_second_half(player1_hand, player2_hand, trump_card, player1_wins)
+    play_second_half(player1_hand, player2_hand, trump_card, player1_wins,deck)
 
 if __name__ == "__main__":
     main()
