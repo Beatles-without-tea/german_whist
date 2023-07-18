@@ -15,10 +15,11 @@ class Card:
         return False
 
 class Deck:
-    def __init__(self):
+    def __init__(self, players = 2):
         self.cards = [Card(s, r) for s in ["Spades", "Hearts", "Diamonds", "Clubs"]
                                  for r in ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]]
         random.shuffle(self.cards)
+        self.players = players
 
     def draw_card(self):
         return self.cards.pop() # TODO pop breaking code
@@ -28,15 +29,24 @@ def deal(deck):
     player2_hand = [deck.draw_card() for _ in range(13)]
     return player1_hand, player2_hand
 
-def choose_card(player_hand, other_player_card):
+def choose_card(player_hand, other_player_card, player, deck):
     """
+    player_hand: list of cards of current player
+    other_player_card: card that was just played by previous player
+    player: string, either player1 or player2
+    deck: class object 
     RULES:
     Card chosen has to be the same suit as 1st played card in trick if possible
     """
     print("Your cards: ", player_hand)
     card = None
     while card not in player_hand:
-        card = input("Choose a card to play: ")
+        # bot that plays randomly
+        if ((player == 'player2') & (deck.players == 1)) :
+            card = str(player_hand[random.randint(0,len(player_hand))])
+            print(f"player 2 played: {card}")
+        else:
+            card = input("Choose a card to play: ")
         r , s = card.replace(' ','').split('of')
         card = Card(s, r)
         # # if player has the suit they have to play the suit
@@ -48,7 +58,7 @@ def choose_card(player_hand, other_player_card):
     player_hand.remove(card)
     return card
 
-def play_trick(player1_hand, player2_hand, trump, player1_wins):
+def play_trick(player1_hand, player2_hand, trump, player1_wins,deck):
     """
 
     """
@@ -59,9 +69,9 @@ def play_trick(player1_hand, player2_hand, trump, player1_wins):
     # if player1 won they start
     if player1_wins:
         print("Player 1's turn")
-        card1 = choose_card(player1_hand, None)
+        card1 = choose_card(player1_hand, None, 'player1',deck)
         print("Player 2's turn")
-        card2 = choose_card(player2_hand, card1)
+        card2 = choose_card(player2_hand, card1, 'player2',deck)
         # reward schema for player 1 starting
         if card1.suit == card2.suit:
             return card1, card2, ranking_dict[card1.rank] >= ranking_dict[card2.rank]
@@ -74,9 +84,9 @@ def play_trick(player1_hand, player2_hand, trump, player1_wins):
 
     else: # else player two starts
         print("Player 2's turn")
-        card2 = choose_card(player2_hand, None)
+        card2 = choose_card(player2_hand, None, 'player2')
         print("Player 1's turn")
-        card1 = choose_card(player1_hand, card2)
+        card1 = choose_card(player1_hand, card2, 'player1')
         # reward schema for player 2 starting
         if card1.suit == card2.suit:
             return card1, card2, ranking_dict[card1.rank] <= ranking_dict[card2.rank]
@@ -97,7 +107,7 @@ def play_first_half(player1_hand, player2_hand, deck):
     for _ in range(13):
         print(f"Current round: {_}")
         print(f"\n The game trump is : {trump_card.suit} \n New card: {next_card}")
-        card1, card2, player1_wins = play_trick(player1_hand, player2_hand, trump_card, player1_wins)
+        card1, card2, player1_wins = play_trick(player1_hand, player2_hand, trump_card, player1_wins,deck)
 
         if player1_wins:
             print("Player 1 wins the trick.")
@@ -128,7 +138,7 @@ def play_second_half(player1_hand, player2_hand, trump_card, player1_wins):
     print(f"\nFinal scores: Player 1: {player1_score}, Player 2: {player2_score}")
 
 def main():
-    deck = Deck()
+    deck = Deck(players=1)
     player1_hand, player2_hand = deal(deck)
     player1_wins, trump_card = play_first_half(player1_hand, player2_hand, deck)
     print(f"\nSecond half. The trump is {trump_card.suit}")
