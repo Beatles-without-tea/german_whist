@@ -86,20 +86,7 @@ def play_trick(player1_hand, player2_hand, trump, player1_wins):
             return card1, card2, False
         else:
             return card1, card2, False
-        
-    # if card1.suit == card2.suit: # if suits are equal, compare the ranks
-    #     return card1, card2, card1.rank >= card2.rank
-    # else: # TODO winning system is wrong
-    #     return card1, card2, card1.suit == trump.suit # else compare suits
-    # player 1 started
-    # if card1.suit == card2.suit:
-    #     return card1, card2, card1.rank >= card2.rank
-    # elif card1.suit == trump.suit:
-    #     return card1, card2, True
-    # elif card2.suit == trump.suit:
-    #     return card1, card2, False
-    # else:
-    #     return card1, card2, True
+
 
 
 def play_first_half(player1_hand, player2_hand, deck):
@@ -144,7 +131,6 @@ def main():
     deck = Deck()
     player1_hand, player2_hand = deal(deck)
     player1_wins, trump_card = play_first_half(player1_hand, player2_hand, deck)
-    
     print(f"\nSecond half. The trump is {trump_card.suit}")
     play_second_half(player1_hand, player2_hand, trump_card, player1_wins)
 
