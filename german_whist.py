@@ -106,40 +106,39 @@ class Play:
                 self.player1_wins =  False
 
 
-    def play_first_half(self):
+    def play_first_half_round(self):
         self.trump_card = self.deck.draw_card()
         print(f"Trump card: {self.trump_card.rank} of {self.trump_card.suit}")
         next_card = self.trump_card # first card is the trump card
-        # player1_wins = True # start new games with player 1 (No dealer)
-        for _ in range(13):
-            print(f"Current round: {_}")
-            print(f"\n The game trump is : {self.trump_card.suit} \n New card: {next_card}")
-            self.play_trick()
+        # for _ in range(13):
+    
+        # print(f"Current round: {_}")
+        print(f"\n The game trump is : {self.trump_card.suit} \n New card: {next_card}")
+        self.play_trick()
+        if self.player1_wins:
+            print("Player 1 wins the trick.")
+            self.player1_hand.append(next_card) # player 1 takes the visible card
+            self.player2_hand.append(self.deck.draw_card()) 
+        else:
+            print("Player 2 wins the trick.")
+            self.player2_hand.append(next_card) # player 2 takes the visible card
+            self.player1_hand.append(self.deck.draw_card()) # player 2 draws the top card
 
-            if self.player1_wins:
-                print("Player 1 wins the trick.")
-                self.player1_hand.append(next_card) # player 1 takes the visible card
-                self.player2_hand.append(self.deck.draw_card()) 
-            else:
-                print("Player 2 wins the trick.")
-                self.player2_hand.append(next_card) # player 2 takes the visible card
-                self.player1_hand.append(self.deck.draw_card()) # player 2 draws the top card
+        next_card = self.deck.draw_card() # draw the following card from the deck
 
-            next_card = self.deck.draw_card() # draw the following card from the deck
-
-    def play_second_half(self):
+    def play_second_half_round(self):
         print(f"\nSecond half. The trump is {self.trump_card.suit}")
 
-        for _ in range(13):
-            print("\nNew trick")
-            self.play_trick()
+        # for _ in range(13):
+        print("\nNew trick")
+        self.play_trick()
 
-            if self.player1_wins:
-                print("Player 1 wins the trick.")
-                self.player1_score += 1
-            else:
-                print("Player 2 wins the trick.")
-                self.player2_score += 1
+        if self.player1_wins:
+            print("Player 1 wins the trick.")
+            self.player1_score += 1
+        else:
+            print("Player 2 wins the trick.")
+            self.player2_score += 1
 
         print(f"\nFinal scores: Player 1: {self.player1_score}, Player 2: {self.player2_score}")
 
@@ -147,8 +146,10 @@ class Play:
 def run_game():
     new_game = Play(players=1)
     new_game.deal()
-    new_game.play_first_half()
-    new_game.play_second_half()
+    for _ in range(13):
+        new_game.play_first_half_round()
+    for _ in range(13):
+        new_game.play_second_half_round()
 
 
 if __name__ == "__main__":
