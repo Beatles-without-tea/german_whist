@@ -55,10 +55,10 @@ class MCTS:
         print('running simulation')
         simulated_game = self.play.copy()
         simulated_game.players = 0
-        simulated_game.player1_wins = False # player 2 chooses first move after player 1
         # play out the game here until the end of the second phase     
-
-        for _ in range( 13 - simulated_game.first_rounds_played):
+        # first round is a half round, the simulation starts at the current point in the game
+        simulated_game.play_first_half_round(13 - simulated_game.first_rounds_played, start_mid_round=True)
+        for _ in range( 13 - simulated_game.first_rounds_played-1):
             simulated_game.play_first_half_round(_)
         for _ in range( 13 - simulated_game.second_rounds_played):
             simulated_game.play_second_half_round()
@@ -86,12 +86,15 @@ class MCTS:
             self.expansion(leaf)
             result = self.simulation(leaf)
             self.backpropagation(leaf, result)
+        print('simulations over')
+        
         return max(root.children, key=lambda c: c.wins/c.visits).action
 
 
-# new_game = Play(players=1)
-# new_game.deal()
-# for _ in range(13):
-#     new_game.play_first_half_round()
-# for _ in range(13):
-#     new_game.play_second_half_round()
+# todo improve strategy
+# todo second round half start?
+# fix almost infinite loop thing?
+# remove print statements for simulations and # fix output 
+# make tests
+# make terminal commands to run game, with flags ex player-1 etc
+#

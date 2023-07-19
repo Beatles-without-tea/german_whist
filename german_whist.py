@@ -51,6 +51,8 @@ class Play:
         self.trump_card = self.deck.draw_card() # trump card for the entire game
         self.first_rounds_played = 0
         self.second_rounds_played = 0 
+        self.card1 = None # last card played by player 1
+        self.card2 = None # last card played by player 2
 
     def copy(self):
         return deepcopy(self)
@@ -73,7 +75,7 @@ class Play:
         while card not in player_hand:
             # Computer player
             if ((player == 'player2') & (self.players == 1)):
-                mcts = MCTS(self,simulation_limit=100)
+                mcts = MCTS(self,simulation_limit=15)
                 card = str(mcts.choose_card(player_hand))
                 print(f"player 2 played: {card}")
             #### simulated players for mcts algorithm
@@ -97,7 +99,7 @@ class Play:
         player_hand.remove(card) # remove card just played from player hand
         return card
 
-    def play_trick(self):
+    def play_trick(self, start_mid_round=False):
         """
 
         """
@@ -107,37 +109,40 @@ class Play:
                         "Q": 12, "K": 13, "A": 14}
         # if player1 won they start
         if self.player1_wins:
-            print("Player 1's turn")
-            card1 = self.choose_card(self.player1_hand, None, 'player1')
+            if start_mid_round:
+                pass
+            else:
+                print("Player 1's turn")
+                self.card1 = self.choose_card(self.player1_hand, None, 'player1')
             print("Player 2's turn")
-            card2 = self.choose_card(self.player2_hand, card1, 'player2')
+            self.card2 = self.choose_card(self.player2_hand, self.card1, 'player2')
             # reward schema for player 1 starting
-            if card1.suit == card2.suit:
-                self.player1_wins =  ranking_dict[card1.rank] >= ranking_dict[card2.rank]
-            elif card1.suit == self.trump_card.suit: # if only player1 played a trump they win
+            if self.card1.suit == self.card2.suit:
+                self.player1_wins =  ranking_dict[self.card1.rank] >= ranking_dict[self.card2.rank]
+            elif self.card1.suit == self.trump_card.suit: # if only player1 played a trump they win
                 self.player1_wins =  True
-            elif card2.suit == self.trump_card.suit: # if only player2 played a trump they win
+            elif self.card2.suit == self.trump_card.suit: # if only player2 played a trump they win
                 self.player1_wins =  False
             else: # if player2 played a different suit that isn't a trump, player1 wins
                 self.player1_wins =  True
 
         else: # else player two starts
             print("Player 2's turn")
-            card2 = self.choose_card(self.player2_hand, None, 'player2')
+            self.card2 = self.choose_card(self.player2_hand, None, 'player2')
             print("Player 1's turn")
-            card1 = self.choose_card(self.player1_hand, card2, 'player1')
+            self.card1 = self.choose_card(self.player1_hand, self.card2, 'player1')
             # reward schema for player 2 starting
-            if card1.suit == card2.suit:
-                self.player1_wins = ranking_dict[card1.rank] > ranking_dict[card2.rank]
-            elif card1.suit == self.trump_card.suit:
+            if self.card1.suit == self.card2.suit:
+                self.player1_wins = ranking_dict[self.card1.rank] > ranking_dict[self.card2.rank]
+            elif self.card1.suit == self.trump_card.suit:
                 self.player1_wins =  True
-            elif card2.suit == self.trump_card.suit:
+            elif self.card2.suit == self.trump_card.suit:
                 self.player1_wins =  False
             else:
                 self.player1_wins =  False
 
 
-    def play_first_half_round(self,round):
+    def play_first_half_round(self,round, start_mid_round = False):
         print(f"Trump card: {self.trump_card.rank} of {self.trump_card.suit}")
         if round == 0:
             next_card = self.trump_card # first card is the trump card
@@ -146,7 +151,7 @@ class Play:
     
         # print(f"Current round: {_}")
         print(f"\n The game trump is : {self.trump_card.suit} \n New card: {next_card}")
-        self.play_trick()
+        self.play_trick(start_mid_round)
         if self.player1_wins:
             print("Player 1 wins the trick.")
             self.player1_hand.append(next_card) # player 1 takes the visible card
