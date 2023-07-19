@@ -1,4 +1,5 @@
 import random
+from monte_carlo_tree_search import MCTS
 
 class Card:
     def __init__(self, suit, rank):
@@ -32,6 +33,7 @@ class Play:
         self.player1_score = 0
         self.player2_score = 0
         self.trump_card = None
+        self.game_over = False
 
     def deal(self):
         self.player1_hand = [self.deck.draw_card() for _ in range(13)]
@@ -49,21 +51,23 @@ class Play:
         print("Your cards: ", player_hand)
         card = None
         while card not in player_hand:
-            # bot that plays randomly
+            # Computer player
             if ((player == 'player2') & (self.players == 1)) :
-                card = str(player_hand[random.randint(0,len(player_hand)-1)])
+                mcts = MCTS(simulation_limit=100)
+                card = mcts.choose_card(player_hand)
+                # card = str(player_hand[random.randint(0,len(player_hand)-1)]) # random choice of card -> good for testing
                 print(f"player 2 played: {card}")
-            else:
+            else: # human player
                 card = input("Choose a card to play: ")
             r , s = card.replace(' ','').split('of')
             card = Card(s, r)
-            # # if player has the suit they have to play the suit
+            # # if player has the suit that was just played they have to play the suit
             if (other_player_card != None):
                 if ((other_player_card.suit in [player_card.suit for player_card in player_hand]) & (card.suit != other_player_card.suit)):
                     print('illegal move')
                     card = None
 
-        player_hand.remove(card)
+        player_hand.remove(card) # remove card just played from player hand
         return card
 
     def play_trick(self):
@@ -83,11 +87,11 @@ class Play:
             # reward schema for player 1 starting
             if card1.suit == card2.suit:
                 self.player1_wins =  ranking_dict[card1.rank] >= ranking_dict[card2.rank]
-            elif card1.suit == self.trump_card.suit:
+            elif card1.suit == self.trump_card.suit: # if only player1 played a trump they win
                 self.player1_wins =  True
-            elif card2.suit == self.trump_card.suit:
+            elif card2.suit == self.trump_card.suit: # if only player2 played a trump they win
                 self.player1_wins =  False
-            else:
+            else: # if player2 played a different suit that isn't a trump, player1 wins
                 self.player1_wins =  True
 
         else: # else player two starts
@@ -107,7 +111,7 @@ class Play:
 
 
     def play_first_half_round(self):
-        self.trump_card = self.deck.draw_card()
+        self.trump_card = self.deck.draw_card() # trump card for the entire game
         print(f"Trump card: {self.trump_card.rank} of {self.trump_card.suit}")
         next_card = self.trump_card # first card is the trump card
         # for _ in range(13):
@@ -118,11 +122,11 @@ class Play:
         if self.player1_wins:
             print("Player 1 wins the trick.")
             self.player1_hand.append(next_card) # player 1 takes the visible card
-            self.player2_hand.append(self.deck.draw_card()) 
+            self.player2_hand.append(self.deck.draw_card()) # player 2 draws the top card
         else:
             print("Player 2 wins the trick.")
             self.player2_hand.append(next_card) # player 2 takes the visible card
-            self.player1_hand.append(self.deck.draw_card()) # player 2 draws the top card
+            self.player1_hand.append(self.deck.draw_card()) # player 1 draws the top card
 
         next_card = self.deck.draw_card() # draw the following card from the deck
 
@@ -141,6 +145,10 @@ class Play:
             self.player2_score += 1
 
         print(f"\nFinal scores: Player 1: {self.player1_score}, Player 2: {self.player2_score}")
+    
+    # def is_game_over(self):
+    #     if self.player1_hand
+    #     self.game_over = False
 
 
 def run_game():
