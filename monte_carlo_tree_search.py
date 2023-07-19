@@ -1,6 +1,8 @@
 from math import sqrt, log
 import random
 
+
+
 class Node:
     def __init__(self, state, parent=None, action=None):
         self.state = state  # This is the hand of Player 2
@@ -11,9 +13,10 @@ class Node:
         self.action = action  
 
 class MCTS:
-    def __init__(self, simulation_limit):
+    def __init__(self, play , simulation_limit ):
+        self.play = play
         self.simulation_limit = simulation_limit
-
+        
     def UCT(self, node):
         # The UCT formula is usually: average reward + exploration factor * sqrt(log(total parent visits) / node visits)
         # The exploration factor balances between exploration and exploitation. We'll use sqrt(2) as a common choice.
@@ -27,6 +30,7 @@ class MCTS:
             node = max(node.children, key=self.UCT)
         return node
 
+
     def expansion(self, node):
         # Add all possible moves as children
         # print('state: ',node.state)
@@ -38,23 +42,28 @@ class MCTS:
            
         # print('loop finished')
 
+
+
+
     def simulation(self, node):
-        # add strategy for player 2
-        # make player 1 random
-        # fix circular import
+        # improve strategy for player 2
         
-        
+    
         """
         Run a simulated game to the end of the second phase, then return the result.
         """
-        simulated_game = Play(players=1)
-        simulated_game.deal()
-        simulated_game.player2_hand = node.state[:]  # Make a copy of the player's hand
-        # play out the game here until the end of the second phase...
-        for _ in range(13):
+        print('running simulation')
+        simulated_game = self.play.copy()
+        simulated_game.players = 0
+        simulated_game.player1_wins = False # player 2 chooses first move after player 1
+        # play out the game here until the end of the second phase     
+
+        for _ in range( 13 - simulated_game.first_rounds_played):
             simulated_game.play_first_half_round(_)
-        for _ in range(13):
+        for _ in range( 13 - simulated_game.second_rounds_played):
             simulated_game.play_second_half_round()
+
+        # payout scores
         if simulated_game.player2_score > simulated_game.player1_score:
             return 1  # Player 2 wins
         else:
@@ -78,6 +87,7 @@ class MCTS:
             result = self.simulation(leaf)
             self.backpropagation(leaf, result)
         return max(root.children, key=lambda c: c.wins/c.visits).action
+
 
 # new_game = Play(players=1)
 # new_game.deal()

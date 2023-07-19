@@ -1,5 +1,20 @@
 import random
 from monte_carlo_tree_search import MCTS
+from copy import deepcopy
+
+def play_lowest_card(hand, other_players_card=None):
+    """
+    Choose the lowest card of the required suit. 
+    If there are no cards of the required suit, choose the lowest card.
+    """
+    
+    if other_players_card is not None:
+        required_suit = other_players_card.suit
+        same_suit_cards = [card for card in hand if card.suit == required_suit]
+        if same_suit_cards:  # If there are any cards of the required suit
+            return min(same_suit_cards, key=lambda card: card.rank)
+    # No cards of the required suit or no suit was required, choose the lowest card
+    return min(hand, key=lambda card: card.rank)
 
 class Card:
     def __init__(self, suit, rank):
@@ -29,19 +44,22 @@ class Play:
     def __init__(self, players=1):
         self.deck = Deck()
         self.players = players
-        self.player1_wins = True
+        self.player1_wins = True # Player 1 always starts the game
         self.player1_score = 0
         self.player2_score = 0
-        self.trump_card = None
         self.game_over = False
         self.trump_card = self.deck.draw_card() # trump card for the entire game
+        self.first_rounds_played = 0
+        self.second_rounds_played = 0 
 
+    def copy(self):
+        return deepcopy(self)
 
     def deal(self):
         self.player1_hand = [self.deck.draw_card() for _ in range(13)]
         self.player2_hand = [self.deck.draw_card() for _ in range(13)]
       
-    def choose_card(self,player_hand, other_player_card, player):
+    def choose_card(self,player_hand, other_player_card, player, card_choice=None):
         """
         player_hand: list of cards of current player
         other_player_card: card that was just played by previous player
@@ -54,11 +72,18 @@ class Play:
         card = None
         while card not in player_hand:
             # Computer player
-            if ((player == 'player2') & (self.players == 1)) :
-                mcts = MCTS(simulation_limit=100)
+            if ((player == 'player2') & (self.players == 1)):
+                mcts = MCTS(self,simulation_limit=100)
                 card = str(mcts.choose_card(player_hand))
-                # card = str(player_hand[random.randint(0,len(player_hand)-1)]) # random choice of card -> good for testing
                 print(f"player 2 played: {card}")
+            #### simulated players for mcts algorithm
+            elif ((player == 'player2') & (self.players == 0)):
+                # player 2 plays according to a strategy
+                card = str(play_lowest_card(player_hand, other_player_card))
+            elif ((player == 'player1') & (self.players == 0)) :
+                #when running mcts simulations player 1 chooses random cards
+                card = str(player_hand[random.randint(0,len(player_hand)-1)]) # random choice of card -> good for testing
+            ####
             else: # human player
                 card = input("Choose a card to play: ")
             r , s = card.replace(' ','').split('of')
@@ -130,7 +155,7 @@ class Play:
             print("Player 2 wins the trick.")
             self.player2_hand.append(next_card) # player 2 takes the visible card
             self.player1_hand.append(self.deck.draw_card()) # player 1 draws the top card
-
+        self.first_rounds_played +=1
         # next_card = self.deck.draw_card() 
 
     def play_second_half_round(self):
@@ -147,7 +172,9 @@ class Play:
             print("Player 2 wins the trick.")
             self.player2_score += 1
 
-        print(f"\nFinal scores: Player 1: {self.player1_score}, Player 2: {self.player2_score}")
+        self.second_rounds_played +=1
+
+        print(f"\Current scores: Player 1: {self.player1_score}, Player 2: {self.player2_score}")
     
     # def is_game_over(self):
     #     if self.player1_hand
@@ -155,7 +182,8 @@ class Play:
 
 
 def run_game():
-    new_game = Play(players=1)
+    players = 1
+    new_game = Play(players=players)
     new_game.deal()
     for _ in range(13):
         new_game.play_first_half_round(_)
