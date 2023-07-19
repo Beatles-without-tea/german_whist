@@ -34,6 +34,8 @@ class Play:
         self.player2_score = 0
         self.trump_card = None
         self.game_over = False
+        self.trump_card = self.deck.draw_card() # trump card for the entire game
+
 
     def deal(self):
         self.player1_hand = [self.deck.draw_card() for _ in range(13)]
@@ -54,7 +56,7 @@ class Play:
             # Computer player
             if ((player == 'player2') & (self.players == 1)) :
                 mcts = MCTS(simulation_limit=100)
-                card = mcts.choose_card(player_hand)
+                card = str(mcts.choose_card(player_hand))
                 # card = str(player_hand[random.randint(0,len(player_hand)-1)]) # random choice of card -> good for testing
                 print(f"player 2 played: {card}")
             else: # human player
@@ -110,11 +112,12 @@ class Play:
                 self.player1_wins =  False
 
 
-    def play_first_half_round(self):
-        self.trump_card = self.deck.draw_card() # trump card for the entire game
+    def play_first_half_round(self,round):
         print(f"Trump card: {self.trump_card.rank} of {self.trump_card.suit}")
-        next_card = self.trump_card # first card is the trump card
-        # for _ in range(13):
+        if round == 0:
+            next_card = self.trump_card # first card is the trump card
+        else:
+            next_card = self.deck.draw_card() # draw the following card from the deck
     
         # print(f"Current round: {_}")
         print(f"\n The game trump is : {self.trump_card.suit} \n New card: {next_card}")
@@ -128,7 +131,7 @@ class Play:
             self.player2_hand.append(next_card) # player 2 takes the visible card
             self.player1_hand.append(self.deck.draw_card()) # player 1 draws the top card
 
-        next_card = self.deck.draw_card() # draw the following card from the deck
+        # next_card = self.deck.draw_card() 
 
     def play_second_half_round(self):
         print(f"\nSecond half. The trump is {self.trump_card.suit}")
@@ -155,7 +158,7 @@ def run_game():
     new_game = Play(players=1)
     new_game.deal()
     for _ in range(13):
-        new_game.play_first_half_round()
+        new_game.play_first_half_round(_)
     for _ in range(13):
         new_game.play_second_half_round()
 
