@@ -57,11 +57,14 @@ class MCTS:
         simulated_game.players = 0
         # play out the game here until the end of the second phase     
         # first round is a half round, the simulation starts at the current point in the game
-        simulated_game.play_first_half_round(13 - simulated_game.first_rounds_played, start_mid_round=True)
+        if ((simulated_game.player1_wins) & (simulated_game.first_rounds_played < 12)):
+            simulated_game.play_first_half_round(13 - simulated_game.first_rounds_played, start_mid_round=True)
         for _ in range( 13 - simulated_game.first_rounds_played-1):
             simulated_game.play_first_half_round(_)
+        if ((simulated_game.player1_wins) & (simulated_game.second_rounds_played < 12)):
+            simulated_game.play_second_half_round(13 - simulated_game.second_rounds_played, start_mid_round=True)
         for _ in range( 13 - simulated_game.second_rounds_played):
-            simulated_game.play_second_half_round()
+            simulated_game.play_second_half_round(_)
 
         # payout scores
         if simulated_game.player2_score > simulated_game.player1_score:
@@ -77,17 +80,16 @@ class MCTS:
             node.wins += result
             node = node.parent
 
-    def choose_card(self, current_state):
+    def choose_card_mcts(self, current_state):
         root = Node(current_state)
         for _ in range(self.simulation_limit):
-            # print("simulation: ", _)
+            print("simulation: ", _)
             leaf = self.selection(root)
             # print('leaf: ', leaf)
             self.expansion(leaf)
             result = self.simulation(leaf)
             self.backpropagation(leaf, result)
         print('simulations over')
-        
         return max(root.children, key=lambda c: c.wins/c.visits).action
 
 

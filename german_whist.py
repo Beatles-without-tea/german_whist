@@ -76,7 +76,7 @@ class Play:
             # Computer player
             if ((player == 'player2') & (self.players == 1)):
                 mcts = MCTS(self,simulation_limit=15)
-                card = str(mcts.choose_card(player_hand))
+                card = str(mcts.choose_card_mcts(player_hand))
                 print(f"player 2 played: {card}")
             #### simulated players for mcts algorithm
             elif ((player == 'player2') & (self.players == 0)):
@@ -163,12 +163,12 @@ class Play:
         self.first_rounds_played +=1
         # next_card = self.deck.draw_card() 
 
-    def play_second_half_round(self):
+    def play_second_half_round(self, round, start_mid_round = False):
         print(f"\nSecond half. The trump is {self.trump_card.suit}")
 
         # for _ in range(13):
         print("\nNew trick")
-        self.play_trick()
+        self.play_trick(start_mid_round)
 
         if self.player1_wins:
             print("Player 1 wins the trick.")
@@ -191,9 +191,11 @@ def run_game():
     new_game = Play(players=players)
     new_game.deal()
     for _ in range(13):
+        print(f'current round: 1 , {_}')
         new_game.play_first_half_round(_)
     for _ in range(13):
-        new_game.play_second_half_round()
+        print(f'current round: 2 , {_}')
+        new_game.play_second_half_round(_)
 
 
 if __name__ == "__main__":
