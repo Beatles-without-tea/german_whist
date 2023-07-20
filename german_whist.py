@@ -2,6 +2,15 @@ import random
 from monte_carlo_tree_search import MCTS
 from copy import deepcopy
 
+
+def is_card_legal(card, other_player_card, player_hand):
+    if (other_player_card != None):
+        if ((other_player_card.suit in [player_card.suit for player_card in player_hand]) & (card.suit != other_player_card.suit)):
+            print('illegal move')
+            card = None
+            return card
+    return card
+
 def play_lowest_card(hand, other_players_card=None):
     """
     Choose the lowest card of the required suit. 
@@ -53,6 +62,9 @@ class Play:
         self.second_rounds_played = 0 
         self.card1 = None # last card played by player 1
         self.card2 = None # last card played by player 2
+        self.ranking_dict = {"2": 2, "3": 3, "4": 4, "5": 5, "6": 6, 
+                "7": 7, "8": 8, "9": 9, "10": 10, "J": 11, 
+                "Q": 12, "K": 13, "A": 14} # this never actually changes
         
     def copy(self):
         return deepcopy(self)
@@ -91,22 +103,38 @@ class Play:
             r , s = card.replace(' ','').split('of')
             card = Card(s, r)
             # # if player has the suit that was just played they have to play the suit
-            if (other_player_card != None):
-                if ((other_player_card.suit in [player_card.suit for player_card in player_hand]) & (card.suit != other_player_card.suit)):
-                    print('illegal move')
-                    card = None
-
+            card = is_card_legal(card, other_player_card, player_hand)
         player_hand.remove(card) # remove card just played from player hand
         return card
+    
+
+
+    def pay_player_1(self):
+        # reward schema for player 1 starting
+        if self.card1.suit == self.card2.suit:
+            self.player1_wins =  self.ranking_dict[self.card1.rank] >= self.ranking_dict[self.card2.rank]
+        elif self.card1.suit == self.trump_card.suit: # if only player1 played a trump they win
+            self.player1_wins =  True
+        elif self.card2.suit == self.trump_card.suit: # if only player2 played a trump they win
+            self.player1_wins =  False
+        else: # if player2 played a different suit that isn't a trump, player1 wins
+            self.player1_wins =  True
+
+    def pay_player_2(self):
+        # reward schema for player 2 starting
+        if self.card1.suit == self.card2.suit:
+            self.player1_wins = self.ranking_dict[self.card1.rank] > self.ranking_dict[self.card2.rank]
+        elif self.card1.suit == self.trump_card.suit:
+            self.player1_wins =  True
+        elif self.card2.suit == self.trump_card.suit:
+            self.player1_wins =  False
+        else:
+            self.player1_wins =  False
 
     def play_trick(self, start_mid_round=False):
         """
 
         """
-        # to be able to compare ranks
-        ranking_dict = {"2": 2, "3": 3, "4": 4, "5": 5, "6": 6, 
-                        "7": 7, "8": 8, "9": 9, "10": 10, "J": 11, 
-                        "Q": 12, "K": 13, "A": 14}
         # if player1 won they start
         if self.player1_wins:
             if start_mid_round:
@@ -116,30 +144,14 @@ class Play:
                 self.card1 = self.choose_card(self.player1_hand, None, 'player1')
             print("Player 2's turn")
             self.card2 = self.choose_card(self.player2_hand, self.card1, 'player2')
-            # reward schema for player 1 starting
-            if self.card1.suit == self.card2.suit:
-                self.player1_wins =  ranking_dict[self.card1.rank] >= ranking_dict[self.card2.rank]
-            elif self.card1.suit == self.trump_card.suit: # if only player1 played a trump they win
-                self.player1_wins =  True
-            elif self.card2.suit == self.trump_card.suit: # if only player2 played a trump they win
-                self.player1_wins =  False
-            else: # if player2 played a different suit that isn't a trump, player1 wins
-                self.player1_wins =  True
+            self.pay_player_1()
 
         else: # else player two starts
             print("Player 2's turn")
             self.card2 = self.choose_card(self.player2_hand, None, 'player2')
             print("Player 1's turn")
             self.card1 = self.choose_card(self.player1_hand, self.card2, 'player1')
-            # reward schema for player 2 starting
-            if self.card1.suit == self.card2.suit:
-                self.player1_wins = ranking_dict[self.card1.rank] > ranking_dict[self.card2.rank]
-            elif self.card1.suit == self.trump_card.suit:
-                self.player1_wins =  True
-            elif self.card2.suit == self.trump_card.suit:
-                self.player1_wins =  False
-            else:
-                self.player1_wins =  False
+            self.pay_player_2()
 
 
     def play_first_half_round(self,round, start_mid_round = False):
@@ -161,7 +173,7 @@ class Play:
             self.player2_hand.append(next_card) # player 2 takes the visible card
             self.player1_hand.append(self.deck.draw_card()) # player 1 draws the top card
         self.first_rounds_played +=1
-        # next_card = self.deck.draw_card() 
+        
         
     def play_second_half_round(self, round, start_mid_round = False):
         print(f"\nSecond half. The trump is {self.trump_card.suit}")
@@ -179,7 +191,7 @@ class Play:
 
         self.second_rounds_played +=1
 
-        print(f"\Current scores: Player 1: {self.player1_score}, Player 2: {self.player2_score}")
+        print(f"Current scores: Player 1: {self.player1_score}, Player 2: {self.player2_score}")
     
     # def is_game_over(self):
     #     if self.player1_hand

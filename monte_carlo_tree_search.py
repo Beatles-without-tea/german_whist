@@ -33,8 +33,6 @@ class MCTS:
 
     def expansion(self, node):
         # Add all possible moves as children
-        # print('state: ',node.state)
-        # Add all possible moves as children
         for card in node.state:
             new_state = node.state[:]  # Copy the current state
             new_state.remove(card)  # Remove the played card
@@ -85,7 +83,6 @@ class MCTS:
         for _ in range(self.simulation_limit):
             print("simulation: ", _)
             leaf = self.selection(root)
-            # print('leaf: ', leaf)
             self.expansion(leaf)
             result = self.simulation(leaf)
             self.backpropagation(leaf, result)

@@ -15,3 +15,6 @@ def test_0_player_game():
         new_game.play_second_half_round(_)
 
 
+# check cards (equality and rankings)
+# make sure payments are correct
+# test card legality
