@@ -19,24 +19,24 @@ These instructions will get you a copy of the project up and running on your loc
 
 Clone the repository to your local machine:
 
-\```bash
+```bash
 git clone https://github.com/Beatles-without-tea/german_whist.git
 cd german_whist
-\```
+```
 
 Install the necessary packages:
 
-\```bash
+```bash
 pip install -r requirements.txt
-\```
+```
 
 ### Usage
 
 To start a new game, run:
 
-\```bash
+```bash
 python german_whist.py
-\```
+```
 
 The game will start and you'll be asked to make your move via command line prompts.
 Simply select a card from the list of cards proposed.
