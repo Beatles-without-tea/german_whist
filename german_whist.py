@@ -53,7 +53,7 @@ class Play:
         self.second_rounds_played = 0 
         self.card1 = None # last card played by player 1
         self.card2 = None # last card played by player 2
-
+        
     def copy(self):
         return deepcopy(self)
 
@@ -162,7 +162,7 @@ class Play:
             self.player1_hand.append(self.deck.draw_card()) # player 1 draws the top card
         self.first_rounds_played +=1
         # next_card = self.deck.draw_card() 
-
+        
     def play_second_half_round(self, round, start_mid_round = False):
         print(f"\nSecond half. The trump is {self.trump_card.suit}")
 
