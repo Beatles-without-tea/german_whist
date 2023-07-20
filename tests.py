@@ -20,8 +20,8 @@ def test_0_player_game():
 def test_payouts():
     new_game = Play(players=0)
     new_game.trump_card = Card('Spades','2')
-    new_game.card1(Card('Diamonds','K'))
-    new_game.card2(Card('Spades','1'))
+    new_game.card1 = Card('Diamonds','K')
+    new_game.card2 = Card('Spades','1')
     new_game.pay_player_1()
     assert new_game.player1_wins == False
 
