@@ -47,9 +47,9 @@ German Whist is a two-player game played with a standard 52-card deck. The objec
 
 ### The First Half (Tricks)
 
-1. The dealer shuffles the deck and the non-dealer cuts. The dealer then deals out the entire deck, one card at a time, so that both players have 13 cards and there is a "stock" pile of 26 cards left over. The top card of the stock is turned face up.
+1. The dealer shuffles the deck and the non-dealer cuts. The dealer then deals out the entire deck, one card at a time, so that both players have 13 cards and there is a "stock" pile of 26 cards left over. The top card of the stock is turned face up. 
 
-2. The non-dealer leads to the first trick. A trick consists of both players playing one card, with the second card played either following suit (matching the suit of the first card) or being a card of a different suit.
+2. The non-dealer leads to the first trick. As theres no dealer in a simulation, player 1 begins the game. A trick consists of both players playing one card, with the second card played either following suit (matching the suit of the first card) or being a card of a different suit.
 
 3. If both cards are of the same suit, the higher card wins the trick. If they are of different suits, the player who led the trick wins. The winner of a trick leads to the next trick.
 
@@ -69,8 +69,8 @@ Remember, strategic play in the first half can greatly affect the outcome in the
 
 If you're interested in improving the game or adding features, feel free to fork the repository and submit pull requests. We'd love to get your contributions. -->
 
-## License
+<!-- ## License
 
-This project is licensed under the MIT License. See the LICENSE.md file for details.
+This project is licensed under the MIT License. See the LICENSE.md file for details. -->
 
 

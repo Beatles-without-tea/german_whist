@@ -193,9 +193,10 @@ class Play:
 
         print(f"Current scores: Player 1: {self.player1_score}, Player 2: {self.player2_score}")
     
-    # def is_game_over(self):
-    #     if self.player1_hand
-    #     self.game_over = False
+    def is_game_over(self):
+        if (self.first_rounds_played + self.second_rounds_played == 26):
+            self.game_over = True
+            print('game over')
 
 
 def run_game():
@@ -208,6 +209,7 @@ def run_game():
     for _ in range(13):
         print(f'current round: 2 , {_}')
         new_game.play_second_half_round(_)
+    new_game.is_game_over()
 
 
 if __name__ == "__main__":
