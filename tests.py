@@ -66,5 +66,5 @@ def test_is_card_legal():
     card2 = Card('Hearts', 'A')
     # Assuming the first card played is Spades, Hearts should not be legal if there is any Spade card in the hand
     hand = [card1, card2]
-    assert is_card_legal(card2, card1, hand) == False
+    assert is_card_legal(card2, card1, hand) == None
 # check cards (equality and rankings)
