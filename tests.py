@@ -46,6 +46,7 @@ def test_1_player_game():
         for _ in range(13):
             new_game.play_second_half_round(_)
         # Check if the game is over
+        new_game.is_game_over()
         assert new_game.game_over == True
 
 
