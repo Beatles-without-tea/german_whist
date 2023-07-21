@@ -52,19 +52,19 @@ German Whist is a two-player game played with a standard 52-card deck. The objec
 
 ### The First Half (Tricks)
 
-1. The dealer shuffles the deck and the non-dealer cuts. The dealer then deals out the entire deck, one card at a time, so that both players have 13 cards and there is a "stock" pile of 26 cards left over. The top card of the stock is turned face up. 
+1. The dealer shuffles the deck and the non-dealer cuts. Although in a coded game there is no dealer. The dealer then deals out the entire deck, one card at a time, so that both players have 13 cards and there is a "stock" pile of 26 cards left over. The top card of the stock is turned face up. The first card to be turned up is the trump card. 
 
-2. The non-dealer leads to the first trick. As theres no dealer in a simulation, player 1 begins the game. A trick consists of both players playing one card, with the second card played either following suit (matching the suit of the first card) or being a card of a different suit.
+2. The non-dealer leads to the first trick. As there's no dealer in a simulation, player 1 begins the game. A trick consists of both players playing one card. The second card played has to follow suit (matching the suit of the first card) if possible or if not possible it can be a card of a different suit.
 
-3. If both cards are of the same suit, the higher card wins the trick. If they are of different suits, the player who led the trick wins. The winner of a trick leads to the next trick.
+3. If both cards are of the same suit, the higher card wins the trick. If they are of different suits, the player who led the trick wins, except if a trump card was played in which case the trump card always wins. The winner of a trick leads to the next trick. 
 
-4. Before the next trick starts, both players draw a card from the top of the stock, beginning with the winner of the trick. The face-up card is also drawn, but this is done last and can be drawn by either player (the winner if the stock is empty, or the player who will lead to the next trick if it is not).
+4. Before the next trick starts, both players draw a card from the stock, beginning with the winner of the trick who takes the visible card. The loser of the trick takes the face-down card.
 
 5. The first half of the game continues until the stock is exhausted. At this point, each player will have a hand of 13 cards and will have won a certain number of tricks.
 
 ### The Second Half (Points)
 
-1. The player who took more tricks in the first half of the game leads to the first trick of the second half. Play continues as before, but without any cards being drawn, and with the rule that players must always follow suit if they can.
+1. The player that won the last trick in the first half of the game leads to the first trick of the second half. Play continues as before, but without any cards being drawn, and with the rule that players must always follow suit if they can.
 
 2. In the second half of the game, each trick is worth one point. The player who scores more points in the second half wins the game.
 
