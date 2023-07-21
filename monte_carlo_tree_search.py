@@ -60,7 +60,7 @@ class MCTS:
             simulated_game.play_first_half_round(_)
         if ((simulated_game.player1_wins) & (simulated_game.second_rounds_played < 12)):
             simulated_game.play_second_half_round(13 - simulated_game.second_rounds_played, start_mid_round=True)
-        for _ in range( 13 - simulated_game.second_rounds_played):
+        for _ in range( 13 - simulated_game.second_rounds_played -1 ):
             simulated_game.play_second_half_round(_)
 
         # payout scores
