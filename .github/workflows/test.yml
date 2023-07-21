@@ -39,6 +39,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install pytest
           pip install tqdm
+          pip install mock
         # Run the tests. I'm using pytest and the file is in the tests directory.
       - name: Run tests
         run: pytest test*

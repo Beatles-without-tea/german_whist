@@ -1,4 +1,5 @@
 from german_whist import Play, is_card_legal, Card
+from unittest.mock import patch
 
 def test_0_player_game():
     players = 0
@@ -16,6 +17,38 @@ def test_0_player_game():
     new_game.is_game_over()
     assert new_game.game_over == True
     assert new_game.player1_score + new_game.player2_score == 13
+
+def test_1_player_game():
+    new_game = Play(players=int(players=1))
+    new_game.deal()
+    for _ in range(13):
+        new_game.play_first_half_round(_)
+    for _ in range(13):
+        new_game.play_second_half_round(_)
+    new_game.is_game_over()
+
+
+def test_1_player_game():
+    # Create the game
+    new_game = Play(players=1)
+    # Deal the cards
+    new_game.deal()
+    # This function will be used to replace the input function
+    def mock_input(prompt):
+        # Each time it's called, it returns the next legal card from the player's hand
+        for card in new_game.player1_hand:
+            if new_game.is_legal(card):
+                return card
+    # Use patch to replace input with our mock_input function during the game rounds
+    with patch('builtins.input', side_effect=mock_input):
+        for _ in range(13):
+            new_game.play_first_half_round(_)
+        for _ in range(13):
+            new_game.play_second_half_round(_)
+    # Check if the game is over
+    assert new_game.is_game_over()
+
+
 
 #check that players hands are correct
 # check if rule checker for cards works    
