@@ -1,5 +1,6 @@
 from german_whist import Play, is_card_legal, Card
 from unittest.mock import patch
+import random
 
 def test_0_player_game():
     players = 0
@@ -36,9 +37,8 @@ def test_1_player_game():
     # This function will be used to replace the input function
     def mock_input(prompt):
         # Each time it's called, it returns the next legal card from the player's hand
-        for card in new_game.player1_hand:
-            if is_card_legal(card) != None:
-                return card
+        card = random.choice(new_game.player1_hand)
+        return card
     # Use patch to replace input with our mock_input function during the game rounds
     with patch('builtins.input', side_effect=mock_input):
         for _ in range(13):
