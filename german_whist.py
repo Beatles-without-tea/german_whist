@@ -1,12 +1,13 @@
 import random
 from monte_carlo_tree_search import MCTS
 from copy import deepcopy
+import sys
 
 
 def is_card_legal(card, other_player_card, player_hand):
     if (other_player_card != None):
         if ((other_player_card.suit in [player_card.suit for player_card in player_hand]) & (card.suit != other_player_card.suit)):
-            print('illegal move')
+            # print('illegal move') 
             card = None
             return card
     return card
@@ -16,14 +17,17 @@ def play_lowest_card(hand, other_players_card=None):
     Choose the lowest card of the required suit. 
     If there are no cards of the required suit, choose the lowest card.
     """
+    ranking_dict = {"2": 2, "3": 3, "4": 4, "5": 5, "6": 6, 
+                "7": 7, "8": 8, "9": 9, "10": 10, "J": 11, 
+                "Q": 12, "K": 13, "A": 14}
     
     if other_players_card is not None:
         required_suit = other_players_card.suit
         same_suit_cards = [card for card in hand if card.suit == required_suit]
         if same_suit_cards:  # If there are any cards of the required suit
-            return min(same_suit_cards, key=lambda card: card.rank)
+            return min(same_suit_cards, key=lambda card: ranking_dict[card.rank])
     # No cards of the required suit or no suit was required, choose the lowest card
-    return min(hand, key=lambda card: card.rank)
+    return min(hand, key=lambda card: ranking_dict[card.rank])
 
 class Card:
     def __init__(self, suit, rank):
@@ -52,12 +56,13 @@ class Deck:
 class Play:
     def __init__(self, players=1):
         self.deck = Deck()
-        self.players = players
+        self.players = players # integer, number of players
         self.player1_wins = True # Player 1 always starts the game
-        self.player1_score = 0
-        self.player2_score = 0
+        self.player1_score = 0 # player 1 score for second half
+        self.player2_score = 0 # player 2 score for second half
         self.game_over = False
         self.trump_card = self.deck.draw_card() # trump card for the entire game
+        self.next_card = self.trump_card # first drawn card is the trumpy card
         self.first_rounds_played = 0
         self.second_rounds_played = 0 
         self.card1 = None # last card played by player 1
@@ -67,6 +72,7 @@ class Play:
                 "Q": 12, "K": 13, "A": 14} # this never actually changes
         self.player1_hand = []
         self.player2_hand = []
+        self.running_simulation = False
 
     def copy(self):
         return deepcopy(self)
@@ -84,14 +90,17 @@ class Play:
         RULES:
         Card chosen has to be the same suit as 1st played card in trick if possible
         """
-        print("Your cards: ", player_hand)
+        print("Your cards: ", player_hand) if self.running_simulation == False else None
         card = None
         while card not in player_hand:
             # Computer player
             if ((player == 'player2') & (self.players == 1)):
+                self.running_simulation = True
                 mcts = MCTS(self,simulation_limit=15)
-                card = str(mcts.choose_card_mcts(player_hand))
-                print(f"player 2 played: {card}")
+                legal_hand = [card for card in player_hand if is_card_legal(card, other_player_card, player_hand) is not None]
+                card = str(mcts.choose_card_mcts(legal_hand))
+                self.running_simulation = False
+                print(f"player 2 played: {card}") if self.running_simulation == False else None
             #### simulated players for mcts algorithm
             elif ((player == 'player2') & (self.players == 0)):
                 # player 2 plays according to a strategy
@@ -106,6 +115,8 @@ class Play:
             card = Card(s, r)
             # # if player has the suit that was just played they have to play the suit
             card = is_card_legal(card, other_player_card, player_hand)
+            if  self.running_simulation == False:
+                print('illegal card') if card == None else print('legal')
         player_hand.remove(card) # remove card just played from player hand
         return card
     
@@ -142,74 +153,86 @@ class Play:
             if start_mid_round:
                 pass
             else:
-                print("Player 1's turn")
+                print("Player 1's turn") if self.running_simulation == False else None
                 self.card1 = self.choose_card(self.player1_hand, None, 'player1')
-            print("Player 2's turn")
+            print("Player 2's turn") if self.running_simulation == False else None
             self.card2 = self.choose_card(self.player2_hand, self.card1, 'player2')
             self.pay_player_1()
 
         else: # else player two starts
-            print("Player 2's turn")
+            print("Player 2's turn") if self.running_simulation == False else None
             self.card2 = self.choose_card(self.player2_hand, None, 'player2')
-            print("Player 1's turn")
+            print("Player 1's turn") if self.running_simulation == False else None
             self.card1 = self.choose_card(self.player1_hand, self.card2, 'player1')
             self.pay_player_2()
 
 
     def play_first_half_round(self,round, start_mid_round = False):
-        print(f"Trump card: {self.trump_card.rank} of {self.trump_card.suit}")
-        if round == 0:
-            next_card = self.trump_card # first card is the trump card
-        else:
-            next_card = self.deck.draw_card() # draw the following card from the deck
-    
+        print("|-------------------------------------------------|") if self.running_simulation == False else None
+        print(f"| Trump card: {self.trump_card.rank} of {self.trump_card.suit}") if self.running_simulation == False else None
+        print("|-------------------------------------------------|") if self.running_simulation == False else None
+        if round > 0: # first round the card is the trump card
+            self.next_card = self.deck.draw_card() # draw the following card from the deck
         # print(f"Current round: {_}")
-        print(f"\n The game trump is : {self.trump_card.suit} \n New card: {next_card}")
+        print(f"\n The game trump is : {self.trump_card.suit} \n New card: {self.next_card}") if self.running_simulation == False else None
         self.play_trick(start_mid_round)
         if self.player1_wins:
-            print("Player 1 wins the trick.")
-            self.player1_hand.append(next_card) # player 1 takes the visible card
+            print("Player 1 wins the trick.") if self.running_simulation == False else None
+            self.player1_hand.append(self.next_card) # player 1 takes the visible card
             self.player2_hand.append(self.deck.draw_card()) # player 2 draws the top card
         else:
-            print("Player 2 wins the trick.")
-            self.player2_hand.append(next_card) # player 2 takes the visible card
+            print("Player 2 wins the trick.") if self.running_simulation == False else None
+            self.player2_hand.append(self.next_card) # player 2 takes the visible card
             self.player1_hand.append(self.deck.draw_card()) # player 1 draws the top card
         self.first_rounds_played +=1
         
         
     def play_second_half_round(self, round, start_mid_round = False):
-        print(f"\nSecond half. The trump is {self.trump_card.suit}")
-
+        print("|-------------------------------------------------|") if self.running_simulation == False else None
+        print(f"\nSecond half. The trump is {self.trump_card.suit}") if self.running_simulation == False else None
+        print("|-------------------------------------------------|") if self.running_simulation == False else None
         # for _ in range(13):
-        print("\nNew trick")
+        print("\nNew trick") if self.running_simulation == False else None
         self.play_trick(start_mid_round)
 
         if self.player1_wins:
-            print("Player 1 wins the trick.")
+            print("|-------------------------------------------------|") if self.running_simulation == False else None
+            print("Player 1 wins the trick.") if self.running_simulation == False else None
+            print("|-------------------------------------------------|") if self.running_simulation == False else None
             self.player1_score += 1
         else:
-            print("Player 2 wins the trick.")
+            print("|-------------------------------------------------|") if self.running_simulation == False else None
+            print("Player 2 wins the trick.") if self.running_simulation == False else None
+            print("|-------------------------------------------------|") if self.running_simulation == False else None
             self.player2_score += 1
 
         self.second_rounds_played +=1
+        print("|-------------------------------------------------|") if self.running_simulation == False else None
+        print(f"Current scores: Player 1: {self.player1_score}, Player 2: {self.player2_score}") if self.running_simulation == False else None
+        print("|-------------------------------------------------|") if self.running_simulation == False else None
 
-        print(f"Current scores: Player 1: {self.player1_score}, Player 2: {self.player2_score}")
-    
     def is_game_over(self):
         if (self.first_rounds_played + self.second_rounds_played == 26):
             self.game_over = True
-            print('game over')
+            print('game over') if self.running_simulation == False else None
 
 
 def run_game():
-    players = 1
-    new_game = Play(players=players)
+    players = sys.argv[1]
+    if players not in ['1','2']:
+        print('Player number must be between 1 and 2')
+        return 'failed'
+    new_game = Play(players=int(players))
     new_game.deal()
     for _ in range(13):
-        print(f'current round: 1 , {_}')
+        print("|-------------------------------------------------|") 
+        print(f'Round 1 Trick {_}')
+        print("|-------------------------------------------------|") 
         new_game.play_first_half_round(_)
     for _ in range(13):
-        print(f'current round: 2 , {_}')
+        print("|-------------------------------------------------|") 
+        print(f'Round 2 Trick {_}')
+        print("|-------------------------------------------------|") 
         new_game.play_second_half_round(_)
     new_game.is_game_over()
 

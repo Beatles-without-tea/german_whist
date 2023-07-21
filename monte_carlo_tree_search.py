@@ -1,7 +1,6 @@
 from math import sqrt, log
 import random
-
-
+from tqdm import tqdm
 
 class Node:
     def __init__(self, state, parent=None, action=None):
@@ -50,7 +49,7 @@ class MCTS:
         """
         Run a simulated game to the end of the second phase, then return the result.
         """
-        print('running simulation')
+        # print('running simulation')
         simulated_game = self.play.copy()
         simulated_game.players = 0
         # play out the game here until the end of the second phase     
@@ -80,13 +79,13 @@ class MCTS:
 
     def choose_card_mcts(self, current_state):
         root = Node(current_state)
-        for _ in range(self.simulation_limit):
-            print("simulation: ", _)
+        for _ in tqdm(range(self.simulation_limit)):
+            # print("simulation: ", _)
             leaf = self.selection(root)
             self.expansion(leaf)
             result = self.simulation(leaf)
             self.backpropagation(leaf, result)
-        print('simulations over')
+        # print('simulations over')
         return max(root.children, key=lambda c: c.wins/c.visits).action
 
 
