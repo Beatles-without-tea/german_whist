@@ -37,7 +37,7 @@ def test_1_player_game():
     def mock_input(prompt):
         # Each time it's called, it returns the next legal card from the player's hand
         for card in new_game.player1_hand:
-            if new_game.is_legal(card):
+            if is_card_legal(card) != None:
                 return card
     # Use patch to replace input with our mock_input function during the game rounds
     with patch('builtins.input', side_effect=mock_input):
