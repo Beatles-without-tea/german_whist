@@ -52,7 +52,7 @@ German Whist is a two-player game played with a standard 52-card deck. The objec
 
 ### The First Half (Tricks)
 
-1. The dealer shuffles the deck and the non-dealer cuts. Although in a coded game there is no dealer. The dealer then deals out the entire deck, one card at a time, so that both players have 13 cards and there is a "stock" pile of 26 cards left over. The top card of the stock is turned face up. The first card to be turned up is the trump card. 
+1. The dealer shuffles the deck and the non-dealer cuts. Although in a coded game there is no dealer. The dealer then deals out the entire deck, one card at a time, so that both players have 13 cards and there is a "stock" pile of 26 cards left over. The top card of the stock is turned face up. The suit of the first card to be turned up is the trump suit and remains so for the entire game. 
 
 2. The non-dealer leads to the first trick. As there's no dealer in a simulation, player 1 begins the game. A trick consists of both players playing one card. The second card played has to follow suit (matching the suit of the first card) if possible or if not possible it can be a card of a different suit.
 
