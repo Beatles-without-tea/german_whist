@@ -12,6 +12,8 @@ def is_card_legal(card, other_player_card, player_hand):
             return card
     return card
 
+            
+
 def play_lowest_card(hand, other_players_card=None):
     """
     Choose the lowest card of the required suit. 
@@ -28,6 +30,8 @@ def play_lowest_card(hand, other_players_card=None):
             return min(same_suit_cards, key=lambda card: ranking_dict[card.rank])
     # No cards of the required suit or no suit was required, choose the lowest card
     return min(hand, key=lambda card: ranking_dict[card.rank])
+
+
 
 class Card:
     def __init__(self, suit, rank):
