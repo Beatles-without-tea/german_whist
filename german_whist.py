@@ -2,7 +2,7 @@ import random
 from monte_carlo_tree_search import MCTS
 from copy import deepcopy
 import sys
-
+from strategy import play_optimal_strategy
 
 def is_card_legal(card, other_player_card, player_hand):
     if (other_player_card != None):
@@ -31,6 +31,14 @@ def play_lowest_card(hand, other_players_card=None):
     # No cards of the required suit or no suit was required, choose the lowest card
     return min(hand, key=lambda card: ranking_dict[card.rank])
 
+def play_random_card(hand, other_players_card =None):
+    if other_players_card is not None:
+        required_suit = other_players_card.suit
+        same_suit_cards = [card for card in hand if card.suit == required_suit]
+        if same_suit_cards:  # If there are any cards of the required suit
+            return random.choice(same_suit_cards)
+    # No cards of the required suit or no suit was required, choose the lowest card
+    return random.choice(hand)
 
 
 class Card:
@@ -58,7 +66,7 @@ class Deck:
         return self.cards.pop() # TODO pop breaking code
 
 class Play:
-    def __init__(self, players=1):
+    def __init__(self, players=1, mcts_simulations=100, simulate_1_v_1=False):
         self.deck = Deck()
         self.players = players # integer, number of players
         self.player1_wins = True # Player 1 always starts the game
@@ -77,7 +85,8 @@ class Play:
         self.player1_hand = []
         self.player2_hand = []
         self.running_simulation = False
-
+        self.simulate_1_v_1 = simulate_1_v_1 #  simulate a  1 v1 where player 2 uses mcts and player 1 plays strategy
+        self.mcts_simulations = mcts_simulations # number of mcts simulations 
     def copy(self):
         return deepcopy(self)
 
@@ -85,7 +94,7 @@ class Play:
         self.player1_hand = [self.deck.draw_card() for _ in range(13)]
         self.player2_hand = [self.deck.draw_card() for _ in range(13)]
       
-    def choose_card(self,player_hand, other_player_card, player, card_choice=None):
+    def choose_card(self,player_hand, other_player_card, player):
         """
         player_hand: list of cards of current player
         other_player_card: card that was just played by previous player
@@ -95,27 +104,42 @@ class Play:
         Card chosen has to be the same suit as 1st played card in trick if possible
         """
         if ((self.players == 1) & (player == 'player1')) or (self.players == 2): # don't show player 2's hand to player 1
-            print("Your cards: ", player_hand) if self.running_simulation == False else None
+            print("Your cards: ", player_hand) if ((self.running_simulation == False) & (self.simulate_1_v_1==False)) else None
         card = None
         while card not in player_hand:
             # Computer player
             if ((player == 'player2') & (self.players == 1)):
                 self.running_simulation = True
-                mcts = MCTS(self,simulation_limit=100)
+                mcts = MCTS(self,simulation_limit= self.mcts_simulations)
                 legal_hand = [card for card in player_hand if is_card_legal(card, other_player_card, player_hand) is not None]
                 card = str(mcts.choose_card_mcts(legal_hand))
                 self.running_simulation = False
-                print(f"Player 2 played: {card}") 
+                print(f"Player 2 played: {card}") if ((self.running_simulation == False) & (self.simulate_1_v_1==False)) else None
             #### simulated players for mcts algorithm
             elif ((player == 'player2') & (self.players == 0)):
                 # player 2 plays according to a strategy
+                # card = str( play_optimal_strategy(player_hand, 
+                #     self.first_rounds_played, 
+                #     self.second_rounds_played,
+                #     self.trump_card,  
+                #     self.next_card,
+                #     other_player_card))
+                # print(card)
                 card = str(play_lowest_card(player_hand, other_player_card))
+                # card = str(play_random_card(player_hand, other_player_card ))
             elif ((player == 'player1') & (self.players == 0)) :
-                #when running mcts simulations player 1 chooses random cards
-                card = str(player_hand[random.randint(0,len(player_hand)-1)]) # random choice of card -> good for testing
+                #when running simulations player 1 strategy
+                card = str(play_lowest_card(player_hand, other_player_card))
+
+                # card = str(player_hand[random.randint(0,len(player_hand)-1)]) # random choice of card -> good for testing
             ####
             else: # human player
-                card = input("Choose a card to play: ")
+                if self.simulate_1_v_1 :
+                    card = str(play_lowest_card(player_hand, other_player_card))
+                else:
+                    card = input("Choose a card to play: ")
+
+
             r , s = card.replace(' ','').split('of')
             card = Card(s, r)
             # # if player has the suit that was just played they have to play the suit
@@ -158,67 +182,72 @@ class Play:
             if start_mid_round:
                 pass
             else:
-                print("Player 1's turn") if self.running_simulation == False else None
+                print("Player 1's turn") if ((self.running_simulation == False) & (self.simulate_1_v_1==False)) else None
                 self.card1 = self.choose_card(self.player1_hand, None, 'player1')
-            print("Player 2's turn") if self.running_simulation == False else None
+            print("Player 2's turn") if ((self.running_simulation == False) & (self.simulate_1_v_1==False)) else None
             self.card2 = self.choose_card(self.player2_hand, self.card1, 'player2')
             self.pay_player_1()
 
         else: # else player two starts
-            print("Player 2's turn") if self.running_simulation == False else None
+            print("Player 2's turn") if ((self.running_simulation == False) & (self.simulate_1_v_1==False)) else None
             self.card2 = self.choose_card(self.player2_hand, None, 'player2')
-            print("Player 1's turn") if self.running_simulation == False else None
+            print("Player 1's turn") if ((self.running_simulation == False) & (self.simulate_1_v_1==False)) else None
             self.card1 = self.choose_card(self.player1_hand, self.card2, 'player1')
             self.pay_player_2()
 
 
     def play_first_half_round(self,round, start_mid_round = False):
-        print(f"Trump card: {self.trump_card.rank} of {self.trump_card.suit}") if self.running_simulation == False else None
+        print(f"Trump card: {self.trump_card.rank} of {self.trump_card.suit}") if ((self.running_simulation == False) & (self.simulate_1_v_1==False)) else None
         if round > 0: # first round the card is the trump card
             self.next_card = self.deck.draw_card() # draw the following card from the deck
         # print(f"Current round: {_}")
         # \n The game trump is : {self.trump_card.suit} \n
-        print(f"New card: {self.next_card}") if self.running_simulation == False else None
+        print(f"New card: {self.next_card}") if ((self.running_simulation == False) & (self.simulate_1_v_1==False)) else None
         self.play_trick(start_mid_round)
         if self.player1_wins:
-            print("Player 1 wins the trick.") if self.running_simulation == False else None
+            print("Player 1 wins the trick.") if ((self.running_simulation == False) & (self.simulate_1_v_1==False)) else None
             self.player1_hand.append(self.next_card) # player 1 takes the visible card
             self.player2_hand.append(self.deck.draw_card()) # player 2 draws the top card
         else:
-            print("Player 2 wins the trick.") if self.running_simulation == False else None
+            print("Player 2 wins the trick.") if ((self.running_simulation == False) & (self.simulate_1_v_1==False)) else None
             self.player2_hand.append(self.next_card) # player 2 takes the visible card
             self.player1_hand.append(self.deck.draw_card()) # player 1 draws the top card
         self.first_rounds_played +=1
         
         
     def play_second_half_round(self, round, start_mid_round = False):
-        print(f"\nSecond half. The trump is {self.trump_card.suit}") if self.running_simulation == False else None
+        print(f"\nSecond half. The trump is {self.trump_card.suit}") if ((self.running_simulation == False) & (self.simulate_1_v_1==False)) else None
         # for _ in range(13):
-        print("\nNew trick") if self.running_simulation == False else None
+        print("\nNew trick") if ((self.running_simulation == False) & (self.simulate_1_v_1==False)) else None
         self.play_trick(start_mid_round)
 
         if self.player1_wins:
-            print("Player 1 wins the trick.") if self.running_simulation == False else None
+            print("Player 1 wins the trick.") if ((self.running_simulation == False) & (self.simulate_1_v_1==False)) else None
             self.player1_score += 1
         else:
-            print("Player 2 wins the trick.") if self.running_simulation == False else None
+            print("Player 2 wins the trick.") if ((self.running_simulation == False) & (self.simulate_1_v_1==False)) else None
             self.player2_score += 1
 
         self.second_rounds_played +=1
-        print(f"Current scores: Player 1: {self.player1_score}, Player 2: {self.player2_score}") if self.running_simulation == False else None
+        print(f"Current scores: Player 1: {self.player1_score}, Player 2: {self.player2_score}") if ((self.running_simulation == False) & (self.simulate_1_v_1==False)) else None
 
     def is_game_over(self):
         if (self.first_rounds_played + self.second_rounds_played == 26):
             self.game_over = True
-            print('game over') if self.running_simulation == False else None
+            print('game over') if ((self.running_simulation == False) & (self.simulate_1_v_1==False)) else None
 
 
 def run_game():
     players = sys.argv[1]
+    mcts_simulations  = sys.argv[2]
+    try:
+        simulate_1_v_1 = sys.argv[3]
+    except:
+        simulate_1_v_1 = False
     if players not in ['1','2']:
         print('Player number must be between 1 and 2')
         return 'failed'
-    new_game = Play(players=int(players))
+    new_game = Play(players=int(players), mcts_simulations = int(mcts_simulations), simulate_1_v_1 = simulate_1_v_1)
     new_game.deal()
     for _ in range(13):
         print("|-------------------------------------------------|") 
@@ -231,6 +260,7 @@ def run_game():
         
         new_game.play_second_half_round(_)
     new_game.is_game_over()
+    print(f"Scores: Player 1: {new_game.player1_score}, Player 2: {new_game.player2_score}") if simulate_1_v_1=="True" else None
 
 
 if __name__ == "__main__":

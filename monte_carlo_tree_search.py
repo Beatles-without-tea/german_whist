@@ -17,10 +17,11 @@ class MCTS:
         self.simulation_limit = simulation_limit
         
     def UCT(self, node):
+        exploration_factor = 0.5
         if node.visits == 0:
             return float('inf')  # prioritize unvisited nodes
         else:
-            return node.wins / node.visits + sqrt(2) * sqrt(log(node.parent.visits) / node.visits)
+            return node.wins / node.visits + exploration_factor * sqrt(log(node.parent.visits) / node.visits)
 
     def selection(self, node):
         while node.children:
@@ -76,4 +77,4 @@ class MCTS:
         return max(root.children, key=lambda c: c.wins/c.visits).action
 
 
-# todo improve strategy
+

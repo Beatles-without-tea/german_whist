@@ -35,16 +35,18 @@ pip install -r requirements.txt
 To start a new game, run:
 
 ```bash
-python german_whist.py {number of players}
+python german_whist.py {number of players} {number of mcts simulations}
 ```
 Such as 
 ```bash
-python german_whist.py 1
+python german_whist.py 1 100 
 ```
 for a single person game. The game supports either 1 or 2 players.
 
 The game will start and you'll be asked to make your move via command line prompts.
 Simply select a card from the list of cards proposed.
+
+
 
 ## Game Rules
 
