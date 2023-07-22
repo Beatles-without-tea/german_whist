@@ -2,7 +2,7 @@ import random
 from monte_carlo_tree_search import MCTS
 from copy import deepcopy
 import sys
-from strategy import play_optimal_strategy
+
 
 def is_card_legal(card, other_player_card, player_hand):
     if (other_player_card != None):
@@ -14,7 +14,7 @@ def is_card_legal(card, other_player_card, player_hand):
 
             
 
-def play_lowest_card(hand, other_players_card=None):
+def basic_strategy(hand, first_rounds_played, second_rounds_played, other_players_card=None):
     """
     Choose the lowest card of the required suit. 
     If there are no cards of the required suit, choose the lowest card.
@@ -23,13 +23,23 @@ def play_lowest_card(hand, other_players_card=None):
                 "7": 7, "8": 8, "9": 9, "10": 10, "J": 11, 
                 "Q": 12, "K": 13, "A": 14}
     
-    if other_players_card is not None:
-        required_suit = other_players_card.suit
-        same_suit_cards = [card for card in hand if card.suit == required_suit]
-        if same_suit_cards:  # If there are any cards of the required suit
-            return min(same_suit_cards, key=lambda card: ranking_dict[card.rank])
-    # No cards of the required suit or no suit was required, choose the lowest card
-    return min(hand, key=lambda card: ranking_dict[card.rank])
+    if first_rounds_played < 13:
+        if other_players_card is not None:
+            required_suit = other_players_card.suit
+            same_suit_cards = [card for card in hand if card.suit == required_suit]
+            if same_suit_cards:  # If there are any cards of the required suit
+                return min(same_suit_cards, key=lambda card: ranking_dict[card.rank])
+        # No cards of the required suit or no suit was required, choose the lowest card
+        return min(hand, key=lambda card: ranking_dict[card.rank])
+    else:
+        if other_players_card is not None:
+            required_suit = other_players_card.suit
+            same_suit_cards = [card for card in hand if card.suit == required_suit]
+            if same_suit_cards:  # If there are any cards of the required suit
+                return max(same_suit_cards, key=lambda card: ranking_dict[card.rank])
+        # No cards of the required suit or no suit was required, choose the highest card
+        return max(hand, key=lambda card: ranking_dict[card.rank])
+
 
 def play_random_card(hand, other_players_card =None):
     if other_players_card is not None:
@@ -125,17 +135,18 @@ class Play:
                 #     self.next_card,
                 #     other_player_card))
                 # print(card)
-                card = str(play_lowest_card(player_hand, other_player_card))
+                card = str(basic_strategy(player_hand, self.first_rounds_played, self.second_rounds_played, other_player_card))
                 # card = str(play_random_card(player_hand, other_player_card ))
             elif ((player == 'player1') & (self.players == 0)) :
                 #when running simulations player 1 strategy
-                card = str(play_lowest_card(player_hand, other_player_card))
-
+                card = str(basic_strategy(player_hand, self.first_rounds_played, self.second_rounds_played, other_player_card))
+            
                 # card = str(player_hand[random.randint(0,len(player_hand)-1)]) # random choice of card -> good for testing
             ####
             else: # human player
                 if self.simulate_1_v_1 :
-                    card = str(play_lowest_card(player_hand, other_player_card))
+                    card = str(basic_strategy(player_hand, self.first_rounds_played, self.second_rounds_played, other_player_card))
+
                 else:
                     card = input("Choose a card to play: ")
 
