@@ -2,6 +2,7 @@ import random
 from monte_carlo_tree_search import MCTS
 from copy import deepcopy
 import sys
+from game_parts import Card
 
 
 def is_card_legal(card, other_player_card, player_hand):
@@ -12,7 +13,6 @@ def is_card_legal(card, other_player_card, player_hand):
             return card
     return card
 
-            
 
 def basic_strategy(hand, first_rounds_played, second_rounds_played, other_players_card=None):
     """
@@ -51,19 +51,6 @@ def play_random_card(hand, other_players_card =None):
     return random.choice(hand)
 
 
-class Card:
-    def __init__(self, suit, rank):
-        self.suit = suit
-        self.rank = rank
-
-    def __repr__(self):
-        return f"{self.rank} of {self.suit}"
-    
-    def __eq__(self, other):
-        # check if a card equals another
-        if isinstance(other, Card):
-            return self.suit == other.suit and self.rank == other.rank
-        return False
 
 class Deck:
     def __init__(self):
@@ -139,13 +126,15 @@ class Play:
                 # card = str(play_random_card(player_hand, other_player_card ))
             elif ((player == 'player1') & (self.players == 0)) :
                 #when running simulations player 1 strategy
-                card = str(basic_strategy(player_hand, self.first_rounds_played, self.second_rounds_played, other_player_card))
-            
+                # card = str(basic_strategy(player_hand, self.first_rounds_played, self.second_rounds_played, other_player_card))
+                card = str(play_random_card(player_hand, other_player_card ))
+
                 # card = str(player_hand[random.randint(0,len(player_hand)-1)]) # random choice of card -> good for testing
             ####
             else: # human player
                 if self.simulate_1_v_1 :
                     card = str(basic_strategy(player_hand, self.first_rounds_played, self.second_rounds_played, other_player_card))
+                    # card = str(play_random_card(player_hand, other_player_card ))
 
                 else:
                     card = input("Choose a card to play: ")

@@ -1,6 +1,7 @@
 from math import sqrt, log
 import random
 from tqdm import tqdm
+from game_parts import Card
 
 class Node:
     def __init__(self, state, parent=None, action=None):
@@ -17,7 +18,7 @@ class MCTS:
         self.simulation_limit = simulation_limit
         
     def UCT(self, node):
-        exploration_factor = 0.5
+        exploration_factor = 1.5
         if node.visits == 0:
             return float('inf')  # prioritize unvisited nodes
         else:
@@ -42,6 +43,10 @@ class MCTS:
         """
         simulated_game = self.play.copy()
         simulated_game.players = 0
+        # Generate a random opponent's hand
+        full_deck = [Card(s, r) for s in ["Spades", "Hearts", "Diamonds", "Clubs"]
+                                 for r in ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]]
+        simulated_game.player2_hand = random.sample(full_deck, len(simulated_game.player2_hand))
         # play out the game here until the end of the second phase     
         # first round is a half round, the simulation starts at the current point in the game
         if ((simulated_game.player1_wins) & (simulated_game.first_rounds_played < 12)):
